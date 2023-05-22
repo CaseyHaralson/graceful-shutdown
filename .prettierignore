@@ -1,0 +1,10 @@
+node_modules
+build
+
+*.json
+*.md
+*.yml
+
+.dockerignore
+.gitignore
+.prettierignore
