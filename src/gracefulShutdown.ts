@@ -1,7 +1,7 @@
 import * as http from 'http';
 import stoppable from 'stoppable';
 
-export default class GracefulShutdown {
+export class GracefulShutdown {
   private static _instance: GracefulShutdown;
   private stoppableServer: (http.Server & stoppable.WithStop) | undefined;
 

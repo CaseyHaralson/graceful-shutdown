@@ -1,1 +1,1 @@
-export * from './gracefulShutdown';
+export {GracefulShutdown} from './gracefulShutdown';
