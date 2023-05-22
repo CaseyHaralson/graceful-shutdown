@@ -1,11 +1,11 @@
 {
-  "name": "graceful-shutdown",
+  "name": "graceful-sd",
   "version": "0.1.0",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
-  "bin": {
-    "graceful-shutdown": "./entry-file.js"
-  },
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "npx rimraf ./build",
