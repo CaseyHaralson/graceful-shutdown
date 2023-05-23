@@ -1,6 +1,7 @@
 {
   "name": "graceful-sd",
-  "version": "0.2.0",
+  "version": "0.2.1",
+  "description": "A library to help with shutting down servers gracefully.",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
   "files": [
@@ -26,5 +27,20 @@
   },
   "dependencies": {
     "stoppable": "^1.1.0"
-  }
+  },
+  "keywords": [
+    "server",
+    "shutdown",
+    "graceful"
+  ],
+  "homepage": "https://github.com/CaseyHaralson/graceful-shutdown#readme",
+  "bugs": {
+    "url": "https://github.com/CaseyHaralson/graceful-shutdown/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CaseyHaralson/graceful-shutdown.git"
+  },
+  "author": "Casey Haralson"
 }
