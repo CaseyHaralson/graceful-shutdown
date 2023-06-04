@@ -4,9 +4,7 @@ A library to help with shutting down servers gracefully.
 
 This library wraps [stoppable](https://github.com/hunterloftis/stoppable) and takes care of listening for SIGINT and SIGTERM events. After getting a shutdown event, the library calls the registered server and calls the stop function.
 
-### Future state
-
-It would be nice to handle closing database connections, flushing logs, etc.
+The library also calls registered callbacks after the server is shutdown.
 
 ## Usage
 
@@ -36,3 +34,18 @@ GracefulShutdown.Instance.registerServer(server);
 ```
 
 If you aren't seeing a "Graceful shutdown [timestamp]" log message at the end of shutdown, then the host service is probably timing out and forcing the process to stop. The host service timeout should be lengthened for adequate stopping time.
+
+### After Server Shutdown Callbacks
+
+You can register callbacks to be run in parallel after the server is shutdown:
+
+```
+import { GracefulShutdown } from 'graceful-sd';
+
+const databaseConnection = CreateDatabaseConnectionSomehow();
+GracefulShutdown.Instance.registerAfterServerShutdownCallback(async () => {
+  await databaseConnection.destroy();
+})
+
+// use the database connection to do database things
+```

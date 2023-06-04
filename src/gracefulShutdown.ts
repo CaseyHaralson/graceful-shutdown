@@ -4,9 +4,11 @@ import stoppable from 'stoppable';
 export class GracefulShutdown {
   private static _instance: GracefulShutdown;
   private stoppableServer: (http.Server & stoppable.WithStop) | undefined;
+  private afterShutdownCallbacks: {(): void}[];
 
   private constructor() {
     this.init();
+    this.afterShutdownCallbacks = [];
   }
 
   public static get Instance() {
@@ -31,16 +33,9 @@ export class GracefulShutdown {
     });
   }
 
-  private shutdown(signal: string) {
-    // probably want to wrap the server in npm project "stoppable"
-    // so it will handle any server connections
-    // then
-    // call server.close() or server.stop()
-    // and close any database connections
-    // etc
-    // Note: you might need to extend the host timeout if we aren't
-    // getting the "Graceful shutdown" log message
+  private async shutdown(signal: string) {
     this.shutdownServer();
+    await this.callAfterServerShutdownCallbacks();
     console.log('Graceful shutdown ', new Date().toISOString());
     process.kill(process.pid, signal);
   }
@@ -59,5 +54,25 @@ export class GracefulShutdown {
       'Server registered with GracefulShutdown ',
       new Date().toISOString()
     );
+  }
+
+  registerAfterServerShutdownCallback(callback: () => void) {
+    this.afterShutdownCallbacks.push(callback);
+  }
+
+  private async callAfterServerShutdownCallbacks() {
+    if (this.afterShutdownCallbacks.length > 0) {
+      console.log(
+        'Calling after server shutdown callbacks ',
+        new Date().toISOString()
+      );
+      await Promise.all(
+        this.afterShutdownCallbacks.map((callback) => callback())
+      );
+      console.log(
+        'Finished calling after server shutdown callbacks ',
+        new Date().toISOString()
+      );
+    }
   }
 }
