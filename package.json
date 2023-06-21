@@ -1,7 +1,7 @@
 {
   "name": "graceful-sd",
-  "version": "0.3.0",
-  "description": "A library to help with shutting down servers gracefully.",
+  "version": "0.3.1",
+  "description": "A library to help with shutting down servers and other node processes gracefully.",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
   "files": [
@@ -31,7 +31,8 @@
   "keywords": [
     "server",
     "shutdown",
-    "graceful"
+    "graceful",
+    "process"
   ],
   "homepage": "https://github.com/CaseyHaralson/graceful-shutdown#readme",
   "bugs": {

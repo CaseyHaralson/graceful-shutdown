@@ -1,6 +1,12 @@
 import * as http from 'http';
 import stoppable from 'stoppable';
 
+/**
+ * Class to help with shutting down servers and other node processes gracefully.
+ *
+ * This class should be used as a singleton so the registered server and/or
+ * callbacks are shutdown/called in the correct order.
+ */
 export class GracefulShutdown {
   private static _instance: GracefulShutdown;
   private stoppableServer: (http.Server & stoppable.WithStop) | undefined;
@@ -11,6 +17,9 @@ export class GracefulShutdown {
     this.afterShutdownCallbacks = [];
   }
 
+  /**
+   * The singleton instance of GracefulShutdown.
+   */
   public static get Instance() {
     return this._instance || (this._instance = new this());
   }
@@ -48,6 +57,11 @@ export class GracefulShutdown {
     }
   }
 
+  /**
+   * Registers a server so it will be stopped when a shutdown
+   * event is passed to the node process.
+   * @param server the server to stop when the node process needs to end
+   */
   registerServer(server: http.Server) {
     this.stoppableServer = stoppable(server);
     console.log(
@@ -56,6 +70,14 @@ export class GracefulShutdown {
     );
   }
 
+  /**
+   * Registers callbacks that will be called during a process shutdown event.
+   *
+   * The callbacks are called in parallel. They will be called after the registered
+   * server (if one is registered) is stopped, or immediately if a server hasn't
+   * been registered.
+   * @param callback the function to call during a node process shutdown event
+   */
   registerAfterServerShutdownCallback(callback: () => void) {
     this.afterShutdownCallbacks.push(callback);
   }
