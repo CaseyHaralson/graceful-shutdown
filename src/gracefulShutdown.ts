@@ -1,4 +1,5 @@
 import * as http from 'http';
+import {pino} from 'pino';
 import stoppable from 'stoppable';
 
 /**
@@ -11,8 +12,10 @@ export class GracefulShutdown {
   private static _instance: GracefulShutdown;
   private stoppableServer: (http.Server & stoppable.WithStop) | undefined;
   private afterShutdownCallbacks: {(): void}[];
+  private logger;
 
   private constructor() {
+    this.logger = this.createLogger();
     this.init();
     this.afterShutdownCallbacks = [];
   }
@@ -24,20 +27,26 @@ export class GracefulShutdown {
     return this._instance || (this._instance = new this());
   }
 
+  private createLogger() {
+    const logger = pino({
+      level:
+        process.env.GRACEFUL_SHUTDOWN_LOG_LEVEL ||
+        process.env.PINO_LOG_LEVEL ||
+        'info',
+    }).child({
+      module: 'GracefulShutdown',
+    });
+    return logger;
+  }
+
   private init() {
     process.once('SIGINT', () => {
-      console.log(
-        'Got SIGINT event. Starting graceful shutdown ',
-        new Date().toISOString()
-      );
+      this.logger.info('Got SIGINT event. Starting shutdown...');
       this.shutdown('SIGINT');
     });
 
     process.once('SIGTERM', () => {
-      console.log(
-        'Got SIGTERM event. Starting graceful shutdown ',
-        new Date().toISOString()
-      );
+      this.logger.info('Got SIGTERM event. Starting shutdown...');
       this.shutdown('SIGTERM');
     });
   }
@@ -45,15 +54,22 @@ export class GracefulShutdown {
   private async shutdown(signal: string) {
     this.shutdownServer();
     await this.callAfterServerShutdownCallbacks();
-    console.log('Graceful shutdown ', new Date().toISOString());
-    process.kill(process.pid, signal);
+    this.logger.info('Shutdown complete.');
+
+    // kill the process after a timeout
+    // this gives the log messages time to flush
+    // this isn't a great answer, but there is an issue up currently...
+    // https://github.com/pinojs/pino/issues/1705
+    setTimeout(() => {
+      process.kill(process.pid, signal);
+    }, 100);
   }
 
   private shutdownServer() {
     if (this.stoppableServer) {
-      console.log('Starting to shutdown server ', new Date().toISOString());
+      this.logger.info('Starting server shutdown...');
       this.stoppableServer.stop();
-      console.log('Server shutdown ', new Date().toISOString());
+      this.logger.info('Server shutdown complete.');
     }
   }
 
@@ -64,10 +80,7 @@ export class GracefulShutdown {
    */
   registerServer(server: http.Server) {
     this.stoppableServer = stoppable(server);
-    console.log(
-      'Server registered with GracefulShutdown ',
-      new Date().toISOString()
-    );
+    this.logger.info('Server registered.');
   }
 
   /**
@@ -84,17 +97,11 @@ export class GracefulShutdown {
 
   private async callAfterServerShutdownCallbacks() {
     if (this.afterShutdownCallbacks.length > 0) {
-      console.log(
-        'Calling after server shutdown callbacks ',
-        new Date().toISOString()
-      );
+      this.logger.info('Starting to call after server shutdown callbacks...');
       await Promise.all(
         this.afterShutdownCallbacks.map((callback) => callback())
       );
-      console.log(
-        'Finished calling after server shutdown callbacks ',
-        new Date().toISOString()
-      );
+      this.logger.info('After server shutdown callbacks complete.');
     }
   }
 }

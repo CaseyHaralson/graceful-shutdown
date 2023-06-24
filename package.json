@@ -26,6 +26,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "pino": "^8.14.1",
     "stoppable": "^1.1.0"
   },
   "keywords": [
