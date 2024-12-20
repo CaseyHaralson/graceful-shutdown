@@ -39,6 +39,13 @@ export class GracefulShutdown {
     return logger;
   }
 
+  /** Set the logger to use. */
+  useLogger(logger: pino.Logger) {
+    this.logger = logger.child({
+      module: 'GracefulShutdown',
+    });
+  }
+
   private init() {
     process.once('SIGINT', () => {
       this.logger.info('Got SIGINT event. Starting shutdown...');
