@@ -1,5 +1,5 @@
 import * as http from 'http';
-import {pino} from 'pino';
+import {pino, Logger} from 'pino';
 import stoppable from 'stoppable';
 
 /**
@@ -40,7 +40,7 @@ export class GracefulShutdown {
   }
 
   /** Set the logger to use. */
-  useLogger(logger: pino.Logger) {
+  useLogger(logger: Logger) {
     this.logger = logger.child({
       module: 'GracefulShutdown',
     });
